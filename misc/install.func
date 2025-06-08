@@ -212,7 +212,7 @@ EOF
   msg_info "Installing core dependencies"
   $STD apt-get update
   $STD apt-get install -y sudo curl mc gnupg2
-  source <(curl -fsSL https://raw.githubusercontent.com/fmcglinn/ProxmoxVE-HelperScripts-local/main/misc/tools.func)
+  source "$(dirname "$0")/tools.func"
   msg_ok "Core dependencies installed"
 }
 

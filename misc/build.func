@@ -877,7 +877,7 @@ install_script() {
       header_info
       echo -e "${INFO}${HOLD} ${GN}Using Config File on node $PVEHOST_NAME${CL}"
       METHOD="config_file"
-      source <(curl -fsSL https://raw.githubusercontent.com/fmcglinn/ProxmoxVE-HelperScripts-local/main/misc/config-file.func)
+      source "$(dirname "$0")/config-file.func"
       config_file
       break
       ;;
@@ -932,7 +932,7 @@ check_container_storage() {
 }
 
 start() {
-  source <(curl -fsSL https://raw.githubusercontent.com/fmcglinn/ProxmoxVE-HelperScripts-local/main/misc/tools.func)
+  source "$(dirname "$0")/build.func"
   if command -v pveversion >/dev/null 2>&1; then
     if ! (whiptail --backtitle "Proxmox VE Helper Scripts" --title "${APP} LXC" --yesno "This will create a New ${APP} LXC. Proceed?" 10 58); then
       clear

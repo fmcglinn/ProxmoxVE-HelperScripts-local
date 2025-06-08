@@ -5,7 +5,6 @@
 # License: MIT
 # https://github.com/fmcglinn/ProxmoxVE-HelperScripts-local/raw/main/LICENSE
 
-source /dev/stdin <<<$(curl -fsSL https://raw.githubusercontent.com/fmcglinn/ProxmoxVE-HelperScripts-local/main/misc/api.func)
 
 function header_info {
   clear

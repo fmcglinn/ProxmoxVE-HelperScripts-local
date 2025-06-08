@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source <(curl -fsSL https://raw.githubusercontent.com/fmcglinn/ProxmoxVE-HelperScripts-local/main/misc/build.func)
+source "$(dirname "$0")/../misc/build.func"
 # Copyright (c) 2021-2025 community-scripts ORG
 # Author: TheRealVira
 # License: MIT | https://github.com/fmcglinn/ProxmoxVE-HelperScripts-local/raw/main/LICENSE

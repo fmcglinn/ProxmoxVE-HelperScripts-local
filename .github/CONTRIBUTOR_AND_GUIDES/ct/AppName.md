@@ -35,30 +35,7 @@
 #!/usr/bin/env bash
 ```
 
-### 1.2 **Import Functions**
-
-- Import the build.func file.
-- When developing your own script, change the URL to your own repository.
-
-> [!IMPORTANT] 
-> You also need to change all apperances of this URL in `misc/build.func` and `misc/install.func`
-
-Example for development:
-
-```bash
-source <(curl -s https://raw.githubusercontent.com/[USER]/[REPO]/refs/heads/[BRANCH]/misc/build.func)
-```
-
-Final script:
-
-```bash
-source <(curl -fsSL https://raw.githubusercontent.com/fmcglinn/ProxmoxVE-HelperScripts-local/main/misc/build.func)
-```
-
-> [!CAUTION]
-> Before opening a Pull Request, change the URLs to point to the community-scripts repo.
-
-### 1.3 **Metadata**
+### 1.2 **Metadata**
 
 - Add clear comments for script metadata, including author, copyright, and license information.
 

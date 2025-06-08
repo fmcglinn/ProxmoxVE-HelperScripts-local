@@ -10,7 +10,7 @@ if ! command -v curl >/dev/null 2>&1; then
   apt-get update >/dev/null 2>&1
   apt-get install -y curl >/dev/null 2>&1
 fi
-source <(curl -fsSL https://git.community-scripts.org/fmcglinn/ProxmoxVE-HelperScripts-localD/raw/branch/main/misc/core.func)
+source "$(dirname "$0")/../../misc/build.func"
 load_functions
 
 set -euo pipefail

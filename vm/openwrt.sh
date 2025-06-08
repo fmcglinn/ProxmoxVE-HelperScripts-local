@@ -7,7 +7,6 @@
 # https://github.com/fmcglinn/ProxmoxVE-HelperScripts-local/raw/main/LICENSE
 # Based on work from https://i12bretro.github.io/tutorials/0405.html
 
-source /dev/stdin <<<$(curl -fsSL https://raw.githubusercontent.com/fmcglinn/ProxmoxVE-HelperScripts-local/main/misc/api.func)
 
 function header_info {
   clear
