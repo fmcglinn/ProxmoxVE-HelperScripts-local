@@ -6,7 +6,7 @@
 # License: MIT | https://github.com/fmcglinn/ProxmoxVE-HelperScripts-local/raw/main/LICENSE
 # Source: https://neo4j.com/product/neo4j-graph-database/
 
-source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"
+source "$(dirname "$0")/../$FUNCTIONS_FILE_PATH"
 color
 verb_ip6
 catch_errors

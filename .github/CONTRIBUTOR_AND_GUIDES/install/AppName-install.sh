@@ -6,7 +6,7 @@
 # Source: [SOURCE_URL]
 
 # Import Functions und Setup
-source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"
+source "$(dirname "$0")/../$FUNCTIONS_FILE_PATH"
 color
 verb_ip6
 catch_errors
