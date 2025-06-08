@@ -932,7 +932,6 @@ check_container_storage() {
 }
 
 start() {
-  source "$(dirname "$0")/build.func"
   if command -v pveversion >/dev/null 2>&1; then
     if ! (whiptail --backtitle "Proxmox VE Helper Scripts" --title "${APP} LXC" --yesno "This will create a New ${APP} LXC. Proceed?" 10 58); then
       clear
