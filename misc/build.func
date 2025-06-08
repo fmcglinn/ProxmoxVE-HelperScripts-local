@@ -9,7 +9,6 @@ variables() {
   var_install="${NSAPP}-install"                    # sets the var_install variable by appending "-install" to the value of NSAPP.
   INTEGER='^[0-9]+([.][0-9]+)?$'                    # it defines the INTEGER regular expression pattern.
   PVEHOST_NAME=$(hostname)                          # gets the Proxmox Hostname and sets it to Uppercase
-  DIAGNOSTICS="yes"                                 # sets the DIAGNOSTICS variable to "yes", used for the API call.
   METHOD="default"                                  # sets the METHOD variable to "default", used for the API call.
   RANDOM_UUID="$(cat /proc/sys/kernel/random/uuid)" # generates a random UUID and sets it to the RANDOM_UUID variable.
 }
@@ -74,7 +73,6 @@ error_handler() {
   local line_number="$1"
   local command="$2"
   local error_message="${RD}[ERROR]${CL} in line ${RD}$line_number${CL}: exit code ${RD}$exit_code${CL}: while executing command ${YW}$command${CL}"
-  post_update_to_api "failed" "${command}"
   echo -e "\n$error_message\n"
 }
 
@@ -819,74 +817,6 @@ advanced_settings() {
   fi
 }
 
-diagnostics_check() {
-  if ! [ -d "/usr/local/community-scripts" ]; then
-    mkdir -p /usr/local/community-scripts
-  fi
-
-  if ! [ -f "/usr/local/community-scripts/diagnostics" ]; then
-    if (whiptail --backtitle "Proxmox VE Helper Scripts" --title "DIAGNOSTICS" --yesno "Send Diagnostics of LXC Installation?\n\n(This only transmits data without user data, just RAM, CPU, LXC name, ...)" 10 58); then
-      cat <<EOF >/usr/local/community-scripts/diagnostics
-DIAGNOSTICS=yes
-
-#This file is used to store the diagnostics settings for the Community-Scripts API.
-#https://github.com/fmcglinn/ProxmoxVE-HelperScripts-local/discussions/1836
-#Your diagnostics will be sent to the Community-Scripts API for troubleshooting/statistical purposes.
-#You can review the data at https://community-scripts.github.io/ProxmoxVE/data
-#If you do not wish to send diagnostics, please set the variable 'DIAGNOSTICS' to "no" in /usr/local/community-scripts/diagnostics, or use the menue.
-#This will disable the diagnostics feature.
-#To send diagnostics, set the variable 'DIAGNOSTICS' to "yes" in /usr/local/community-scripts/diagnostics, or use the menue.
-#This will enable the diagnostics feature.
-#The following information will be sent:
-#"ct_type"
-#"disk_size"
-#"core_count"
-#"ram_size"
-#"os_type"
-#"os_version"
-#"disableip6"
-#"nsapp"
-#"method"
-#"pve_version"
-#"status"
-#If you have any concerns, please review the source code at /misc/build.func
-EOF
-      DIAGNOSTICS="yes"
-    else
-      cat <<EOF >/usr/local/community-scripts/diagnostics
-DIAGNOSTICS=no
-
-#This file is used to store the diagnostics settings for the Community-Scripts API.
-#https://github.com/fmcglinn/ProxmoxVE-HelperScripts-local/discussions/1836
-#Your diagnostics will be sent to the Community-Scripts API for troubleshooting/statistical purposes.
-#You can review the data at https://community-scripts.github.io/ProxmoxVE/data
-#If you do not wish to send diagnostics, please set the variable 'DIAGNOSTICS' to "no" in /usr/local/community-scripts/diagnostics, or use the menue.
-#This will disable the diagnostics feature.
-#To send diagnostics, set the variable 'DIAGNOSTICS' to "yes" in /usr/local/community-scripts/diagnostics, or use the menue.
-#This will enable the diagnostics feature.
-#The following information will be sent:
-#"ct_type"
-#"disk_size"
-#"core_count"
-#"ram_size"
-#"os_type"
-#"os_version"
-#"disableip6"
-#"nsapp"
-#"method"
-#"pve_version"
-#"status"
-#If you have any concerns, please review the source code at /misc/build.func
-EOF
-      DIAGNOSTICS="no"
-    fi
-  else
-    DIAGNOSTICS=$(awk -F '=' '/^DIAGNOSTICS/ {print $2}' /usr/local/community-scripts/diagnostics)
-
-  fi
-
-}
-
 install_script() {
   pve_check
   shell_check
@@ -894,7 +824,6 @@ install_script() {
   arch_check
   ssh_check
   maxkeys_check
-  diagnostics_check
 
   if systemctl is-active -q ping-instances.service; then
     systemctl -q stop ping-instances.service
@@ -910,7 +839,6 @@ install_script() {
       "2" "Default Settings (with verbose)" \
       "3" "Advanced Settings" \
       "4" "Use Config File" \
-      "5" "Diagnostic Settings" \
       "6" "Exit" --nocancel --default-item "1" 3>&1 1>&2 2>&3)
 
     if [ $? -ne 0 ]; then
@@ -952,24 +880,6 @@ install_script() {
       source <(curl -fsSL https://raw.githubusercontent.com/fmcglinn/ProxmoxVE-HelperScripts-local/main/misc/config-file.func)
       config_file
       break
-      ;;
-    5)
-      if [[ $DIAGNOSTICS == "yes" ]]; then
-        if whiptail --backtitle "Proxmox VE Helper Scripts" --title "DIAGNOSTICS SETTINGS" --yesno "Send Diagnostics of LXC Installation?\n\nCurrent setting: ${DIAGNOSTICS}" 10 58 \
-          --yes-button "No" --no-button "Back"; then
-          DIAGNOSTICS="no"
-          sed -i 's/^DIAGNOSTICS=.*/DIAGNOSTICS=no/' /usr/local/community-scripts/diagnostics
-          whiptail --backtitle "Proxmox VE Helper Scripts" --title "DIAGNOSTICS SETTINGS" --msgbox "Diagnostics settings changed to ${DIAGNOSTICS}." 8 58
-        fi
-      else
-        if whiptail --backtitle "Proxmox VE Helper Scripts" --title "DIAGNOSTICS SETTINGS" --yesno "Send Diagnostics of LXC Installation?\n\nCurrent setting: ${DIAGNOSTICS}" 10 58 \
-          --yes-button "Yes" --no-button "Back"; then
-          DIAGNOSTICS="yes"
-          sed -i 's/^DIAGNOSTICS=.*/DIAGNOSTICS=yes/' /usr/local/community-scripts/diagnostics
-          whiptail --backtitle "Proxmox VE Helper Scripts" --title "DIAGNOSTICS SETTINGS" --msgbox "Diagnostics settings changed to ${DIAGNOSTICS}." 8 58
-        fi
-      fi
-
       ;;
     6)
       echo -e "${CROSS}${RD}Exiting.${CL}"
@@ -1074,10 +984,6 @@ build_container() {
 
   if [ "$ENABLE_FUSE" == "yes" ]; then
     FEATURES="$FEATURES,fuse=1"
-  fi
-
-  if [[ $DIAGNOSTICS == "yes" ]]; then
-    post_to_api
   fi
 
   TEMP_DIR=$(mktemp -d)
@@ -1235,7 +1141,6 @@ EOF
     systemctl start ping-instances.service
   fi
 
-  post_update_to_api "done" "none"
 }
 
 set_std_mode() {
@@ -1254,32 +1159,3 @@ silent() {
     "$@" || return 1
   fi
 }
-
-api_exit_script() {
-  exit_code=$? # Capture the exit status of the last executed command
-  #200 exit codes indicate error in create_lxc.sh
-  #100 exit codes indicate error in install.func
-
-  if [ $exit_code -ne 0 ]; then
-    case $exit_code in
-    100) post_update_to_api "failed" "100: Unexpected error in create_lxc.sh" ;;
-    101) post_update_to_api "failed" "101: No network connection detected in create_lxc.sh" ;;
-    200) post_update_to_api "failed" "200: LXC creation failed in create_lxc.sh" ;;
-    201) post_update_to_api "failed" "201: Invalid Storage class in create_lxc.sh" ;;
-    202) post_update_to_api "failed" "202: User aborted menu in create_lxc.sh" ;;
-    203) post_update_to_api "failed" "203: CTID not set in create_lxc.sh" ;;
-    204) post_update_to_api "failed" "204: PCT_OSTYPE not set in create_lxc.sh" ;;
-    205) post_update_to_api "failed" "205: CTID cannot be less than 100 in create_lxc.sh" ;;
-    206) post_update_to_api "failed" "206: CTID already in use in create_lxc.sh" ;;
-    207) post_update_to_api "failed" "207: Template not found in create_lxc.sh" ;;
-    208) post_update_to_api "failed" "208: Error downloading template in create_lxc.sh" ;;
-    209) post_update_to_api "failed" "209: Container creation failed, but template is intact in create_lxc.sh" ;;
-    *) post_update_to_api "failed" "Unknown error, exit code: $exit_code in create_lxc.sh" ;;
-    esac
-  fi
-}
-
-trap 'api_exit_script' EXIT
-trap 'post_update_to_api "failed" "$BASH_COMMAND"' ERR
-trap 'post_update_to_api "failed" "INTERRUPTED"' SIGINT
-trap 'post_update_to_api "failed" "TERMINATED"' SIGTERM

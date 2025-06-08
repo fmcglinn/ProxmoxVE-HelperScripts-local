@@ -62,14 +62,11 @@ THIN="discard=on,ssd=1,"
 set -e
 trap 'error_handler $LINENO "$BASH_COMMAND"' ERR
 trap cleanup EXIT
-trap 'post_update_to_api "failed" "INTERRUPTED"' SIGINT
-trap 'post_update_to_api "failed" "TERMINATED"' SIGTERM
 function error_handler() {
   local exit_code="$?"
   local line_number="$1"
   local command="$2"
   local error_message="${RD}[ERROR]${CL} in line ${RD}$line_number${CL}: exit code ${RD}$exit_code${CL}: while executing command ${YW}$command${CL}"
-  post_update_to_api "failed" "${command}"
   echo -e "\n$error_message\n"
   cleanup_vmid
 }
@@ -100,7 +97,6 @@ function cleanup_vmid() {
 
 function cleanup() {
   popd >/dev/null
-  post_update_to_api "done" "none"
   rm -rf $TEMP_DIR
 }
 
@@ -408,7 +404,6 @@ pve_check
 ssh_check
 start_script
 
-post_to_api_vm
 
 msg_info "Validating Storage"
 while read -r line; do
