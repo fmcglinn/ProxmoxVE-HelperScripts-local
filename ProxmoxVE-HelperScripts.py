@@ -98,23 +98,28 @@ def load_metadata():
                     script_type = data.get("type", "other")
                     for method in data.get("install_methods", []):
                         script = method.get("script")
+                        method_type = method.get("type")
                         if script:
                             scripts.append({
                                 "name": name,
                                 "type": script_type,
-                                "script": script
+                                "script": script,
+                                "method_type": method_type
                             })
             except Exception as e:
                 print(f"> Failed to parse {filename}: {e}")
     return scripts
 
-
 def group_by_type(scripts):
-    grouped = {}
-    for entry in scripts:
-        grouped.setdefault(entry["type"], []).append(entry)
-    return grouped
+  grouped = {}
+  for entry in scripts:
+    grouped.setdefault(entry["type"], []).append(entry)
 
+  # Sort entries within each type by name (case-insensitive)
+  for entries in grouped.values():
+    entries.sort(key=lambda e: e["name"].lower())
+
+  return grouped
 
 def run_script(path):
     abs_path = os.path.abspath(path)
@@ -139,7 +144,12 @@ def present_menu(grouped):
         return
 
     entries = grouped[selected_type]
-    choices = [f'{e["name"]} ({e["script"]})' for e in entries]
+    choices = [
+      f'{e["name"]}/{e["method_type"]}'
+      if e.get("method_type") and e["method_type"] != "default"
+      else f'{e["name"]}'
+      for e in entries
+    ]
 
     selected = questionary.select(
         "Select a script to run:",
@@ -162,7 +172,7 @@ def main():
         print("> No valid scripts found.")
         sys.exit(1)
 
-    os.system("echo -ne '\ec'")
+    os.system("echo '\ec'")
     show_header()
     grouped = group_by_type(scripts)
     present_menu(grouped)
