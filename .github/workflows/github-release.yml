@@ -7,7 +7,7 @@ on:
   
 jobs:
   create-daily-release:
-    if: github.repository == 'community-scripts/ProxmoxVE'
+    if: github.repository == 'fmcglinn/ProxmoxVE-HelperScripts-local'
     runs-on: runner-cluster-htl-set
     permissions:
       contents: write

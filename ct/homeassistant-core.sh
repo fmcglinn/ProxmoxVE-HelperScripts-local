@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/build.func)
+source <(curl -fsSL https://raw.githubusercontent.com/fmcglinn/ProxmoxVE-HelperScripts-local/main/misc/build.func)
 # Copyright (c) 2021-2025 community-scripts ORG
 # Author: tteck (tteckster) | Co-Author: MickLesk (CanbiZ)
-# License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
+# License: MIT | https://github.com/fmcglinn/ProxmoxVE-HelperScripts-local/raw/main/LICENSE
 # Source: https://www.home-assistant.io/
 
 APP="Home Assistant-Core"
@@ -23,7 +23,7 @@ function update_script() {
   header_info
   if ! lsb_release -d | grep -q "Ubuntu 24.10"; then
     msg_error "Wrong OS detected. This script only supports Ubuntu 24.10."
-    msg_error "Read Guide: https://github.com/community-scripts/ProxmoxVE/discussions/1549"
+    msg_error "Read Guide: https://github.com/fmcglinn/ProxmoxVE-HelperScripts-local/discussions/1549"
     exit 1
   fi
   check_container_storage
