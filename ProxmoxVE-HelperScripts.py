@@ -162,7 +162,7 @@ def main():
         print("> No valid scripts found.")
         sys.exit(1)
 
-    os.system('clear')
+    os.system("echo -ne '\ec'")
     show_header()
     grouped = group_by_type(scripts)
     present_menu(grouped)
